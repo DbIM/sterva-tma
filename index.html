@@ -551,48 +551,56 @@
 
         // Handle form submission
             function handleBooking(event) {
-                    event.preventDefault();
-                    
-                    const form = event.target;
-                    const submitButton = document.getElementById('submitButton');
-                    const originalText = submitButton.innerHTML;
-                    
-                    // Показываем загрузку
-                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ПОСВЯЩАЕМ В КОВЕН...';
-                    submitButton.classList.add('loading');
-                    
-                    // Берем только имя (если нужно) и Telegram данные
-                    const userName = document.getElementById('userName').value || 'Новая ведьма';
-                    const userTelegram = user?.username ? `@${user.username}` : 'Не указан';
-                    const userId = user?.id || 'Неизвестен';
-                    
-                    // Формируем сообщение для бота
-                    const message = `🦇 НОВАЯ ВЕДЬМА ХОЧЕТ В КОВЕН!\n\n` +
-                                `🔮 Имя: ${userName}\n` +
-                                `⚡ Telegram: ${userTelegram}\n` +
-                                `🆔 ID: ${userId}\n` +
-                                `⏰ ${new Date().toLocaleString('ru-RU')}\n\n` +
-                                `🚀 СРОЧНО ДОБАВЬ В КУРС!`;
-                    
-                    // Открываем чат с ботом и предзаполняем сообщение
-                    const botUrl = `https://t.me/BlackPshychoMagicBot?text=${encodeURIComponent(message)}`;
+                event.preventDefault();
+                
+                const form = event.target;
+                const submitButton = document.getElementById('submitButton');
+                const originalText = submitButton.innerHTML;
+                
+                // Показываем загрузку
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ПОСВЯЩАЕМ В КОВЕН...';
+                submitButton.classList.add('loading');
+                
+                // Берем только имя (если нужно) и Telegram данные
+                const userName = document.getElementById('userName').value || 'Новая ведьма';
+                const userTelegram = document.getElementById('userTelegram').value || 'Не указан';
+                const userId = user?.id || 'Неизвестен';
+                
+                // Формируем сообщение для бота
+                const message = `🦇 НОВАЯ ВЕДЬМА ХОЧЕТ В КОВЕН!\n\n` +
+                            `🔮 Имя: ${userName}\n` +
+                            `⚡ Telegram: ${userTelegram}\n` +
+                            `🆔 ID: ${userId}\n` +
+                            `⏰ ${new Date().toLocaleString('ru-RU')}\n\n` +
+                            `🚀 СРОЧНО ДОБАВЬ В КУРС!`;
+                
+                // 🔧 ИСПРАВЛЕНИЕ: Используем нативный метод для iOS
+                const botUrl = `https://t.me/BlackPshychoMagicBot?text=${encodeURIComponent(message)}`;
+                
+                // Пробуем оба способа для кроссплатформенности
+                if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
+                    // Для iOS используем нативный метод
+                    tg.openTelegramLink(botUrl);
+                } else {
+                    // Для веба и Android используем обычный способ
                     window.open(botUrl, '_blank');
-                    
-                    // Показываем успех
-                    tg.showPopup({
-                        title: 'Посвящение началось! 🔥',
-                        message: `${userName}, твоя заявка отправлена в ковен! Я свяжусь с тобой для инициации.`,
-                        buttons: [{ type: 'ok' }]
-                    });
-                    
-                    // Закрываем модалку и сбрасываем форму
-                    closeBookingModal();
-                    form.reset();
-                    
-                    // Восстанавливаем кнопку
-                    submitButton.innerHTML = originalText;
-                    submitButton.classList.remove('loading');
                 }
+                
+                // Показываем успех
+                tg.showPopup({
+                    title: 'Посвящение началось! 🔥',
+                    message: `${userName}, твоя заявка отправлена в ковен! Я свяжусь с тобой для инициации.`,
+                    buttons: [{ type: 'ok' }]
+                });
+                
+                // Закрываем модалку и сбрасываем форму
+                closeBookingModal();
+                form.reset();
+                
+                // Восстанавливаем кнопку
+                submitButton.innerHTML = originalText;
+                submitButton.classList.remove('loading');
+            }
 
         // Telegram back button handler
         function handleBack() {
