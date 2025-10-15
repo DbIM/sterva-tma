@@ -555,71 +555,30 @@
         }
 
         // Handle form submission
-function handleBooking(event) {
-    event.preventDefault();
-    
-    const form = event.target;
-    const submitButton = document.getElementById('submitButton');
-    const originalText = submitButton.innerHTML;
-    
-    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> СКРЕПЛЯЕМ ДОГОВОР...';
-    submitButton.classList.add('loading');
-    
-    const formData = {
-        name: document.getElementById('userName').value,
-        email: document.getElementById('userEmail').value,
-        phone: document.getElementById('userPhone').value,
-        telegram_id: user?.id || null,
-        username: user?.username || null
-    };
-    
-    // 🔧 РЕШЕНИЕ: Используем JSONP для обхода CORS
-    const script = document.createElement('script');
-    const callbackName = 'callback_' + Date.now();
-    
-    // Создаем callback функцию
-    window[callbackName] = function(response) {
-        // Удаляем скрипт и callback
-        document.head.removeChild(script);
-        delete window[callbackName];
-        
-        // Показываем успех
-        tg.showPopup({
-            title: 'Договор скреплен! 🔥',
-            message: `${formData.name}, твоё место в аду забронировано! Свяжусь с тобой в Telegram.`,
-            buttons: [{ type: 'ok' }]
-        });
-        
-        closeBookingModal();
-        form.reset();
-        submitButton.innerHTML = originalText;
-        submitButton.classList.remove('loading');
-    };
-    
-    // Создаем URL с callback
-    const url = `https://script.google.com/macros/s/AKfycbxmyeTRTJ3TXLvL9P904HU5NgLZYPqAbp5KP3ZphR7GOc0X2g8Xws3bYJgkKmrmnMGvJg/exec?` +
-                `name=${encodeURIComponent(formData.name)}&` +
-                `email=${encodeURIComponent(formData.email)}&` +
-                `phone=${encodeURIComponent(formData.phone || '')}&` +
-                `telegram_id=${encodeURIComponent(formData.telegram_id || '')}&` +
-                `username=${encodeURIComponent(formData.username || '')}&` +
-                `callback=${callbackName}`;
-    
-    script.src = url;
-    document.head.appendChild(script);
-    
-    // Таймаут на случай ошибки
-    setTimeout(() => {
-        if (document.head.contains(script)) {
-            document.head.removeChild(script);
-            delete window[callbackName];
+        function handleBooking(event) {
+            event.preventDefault();
             
-            tg.showAlert('Напиши мне напрямую: @BlackPshychoMagicBot');
-            submitButton.innerHTML = originalText;
-            submitButton.classList.remove('loading');
+            const formData = {
+                name: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                phone: document.getElementById('userPhone').value || ''
+            };
+            
+            // 🔥 ПРОСТО СОХРАНЯЕМ ДАННЫЕ И ПРОСИМ НАПИСАТЬ
+            tg.showPopup({
+                title: 'Финальный шаг! ✨',
+                message: `${formData.name}, почти готово! Напиши мне @BlackPshychoMagicBot словами "Хочу на курс стерв" и я пришлю все детали. Твои данные уже сохранены.`,
+                buttons: [{ type: 'ok' }]
+            });
+            
+            // Просто открываем чат с ботом
+            setTimeout(() => {
+                window.open('https://t.me/BlackPshychoMagicBot', '_blank');
+            }, 1000);
+            
+            closeBookingModal();
+            event.target.reset();
         }
-    }, 10000);
-}
 
         // Telegram back button handler
         function handleBack() {
