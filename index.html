@@ -460,8 +460,8 @@
                            placeholder="Твоё имя" required>
                 </div>
                 <div class="form-group">
-                    <input type="email" class="form-input" id="userEmail" 
-                           placeholder="Email для инструкций" required>
+                    <input type="tgname" class="form-input" id="userTgName" 
+                           placeholder="Ник в телеграм для связи" required>
                 </div>
                 <div class="form-group">
                     <input type="tel" class="form-input" id="userPhone" 
@@ -560,7 +560,7 @@
             
             const formData = {
                 name: document.getElementById('userName').value,
-                email: document.getElementById('userEmail').value,
+                tgname: document.getElementById('userTgName').value,
                 phone: document.getElementById('userPhone').value,
                 telegram_id: user?.id || null,
                 username: user?.username || null
