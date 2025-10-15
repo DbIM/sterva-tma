@@ -499,6 +499,7 @@
             const userName = user.first_name || user.username || '';
             document.getElementById('userName').value = userName;
         }
+        
 
         // Modal functions
         function openLessonModal(lessonNumber) {
@@ -557,15 +558,6 @@
         function handleBooking(event) {
             event.preventDefault();
             
-            const form = event.target;
-            const submitButton = document.getElementById('submitButton');
-            const originalText = submitButton.innerHTML;
-            
-            // Show loading state
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ОБРАБОТКА...';
-            submitButton.classList.add('loading');
-            
-            // Collect form data
             const formData = {
                 name: document.getElementById('userName').value,
                 email: document.getElementById('userEmail').value,
@@ -574,29 +566,25 @@
                 username: user?.username || null
             };
             
-            // Simulate API call
-            setTimeout(() => {
-                // Show success message
+            // 🔒 БЕЗОПАСНЫЙ ВЫЗОВ - токен спрятан в Google Script
+            fetch('https://script.google.com/macros/s/AKfycbxmyeTRTJ3TXLvL9P904HU5NgLZYPqAbp5KP3ZphR7GOc0X2g8Xws3bYJgkKmrmnMGvJg/exec', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                // Успех!
                 tg.showPopup({
-                    title: 'Бронь принята!',
-                    message: `Привет, ${formData.name}! Твоё место в аду забронировано. Инструкции по ритуалу инициации уже летят к тебе на почту.`,
+                    title: 'Успех! 🔥',
+                    message: `${formData.name}, твоя заявка принята! Свяжусь с тобой в Telegram.`,
                     buttons: [{ type: 'ok' }]
-                }, () => {
-                    // Close modal and reset form
-                    closeBookingModal();
-                    form.reset();
-                    
-                    // Restore button
-                    submitButton.innerHTML = originalText;
-                    submitButton.classList.remove('loading');
-                    
-                    // Send data to bot (in real app, you'd use tg.sendData())
-                    console.log('Booking data:', formData);
-                    
-                    // Show confirmation in main button
-                    tg.showAlert('Добро пожаловать в ковен! 🔥');
                 });
-            }, 2000);
+                closeBookingModal();
+                form.reset();
+            })
+            .catch(error => {
+                tg.showAlert('Напиши мне напрямую: @BlackPshychoMagicBot');
+            });
         }
 
         // Telegram back button handler
