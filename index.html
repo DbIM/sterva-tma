@@ -460,8 +460,8 @@
                            placeholder="Твоё имя" required>
                 </div>
                 <div class="form-group">
-                    <input type="tgname" class="form-input" id="userTgName" 
-                           placeholder="Ник в телеграм для связи" required>
+                    <input type="email" class="form-input" id="userEmail" 
+                           placeholder="Email для связи" required>
                 </div>
                 <div class="form-group">
                     <input type="tel" class="form-input" id="userPhone" 
@@ -555,37 +555,71 @@
         }
 
         // Handle form submission
-        function handleBooking(event) {
-            event.preventDefault();
+function handleBooking(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const submitButton = document.getElementById('submitButton');
+    const originalText = submitButton.innerHTML;
+    
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> СКРЕПЛЯЕМ ДОГОВОР...';
+    submitButton.classList.add('loading');
+    
+    const formData = {
+        name: document.getElementById('userName').value,
+        email: document.getElementById('userEmail').value,
+        phone: document.getElementById('userPhone').value,
+        telegram_id: user?.id || null,
+        username: user?.username || null
+    };
+    
+    // 🔧 РЕШЕНИЕ: Используем JSONP для обхода CORS
+    const script = document.createElement('script');
+    const callbackName = 'callback_' + Date.now();
+    
+    // Создаем callback функцию
+    window[callbackName] = function(response) {
+        // Удаляем скрипт и callback
+        document.head.removeChild(script);
+        delete window[callbackName];
+        
+        // Показываем успех
+        tg.showPopup({
+            title: 'Договор скреплен! 🔥',
+            message: `${formData.name}, твоё место в аду забронировано! Свяжусь с тобой в Telegram.`,
+            buttons: [{ type: 'ok' }]
+        });
+        
+        closeBookingModal();
+        form.reset();
+        submitButton.innerHTML = originalText;
+        submitButton.classList.remove('loading');
+    };
+    
+    // Создаем URL с callback
+    const url = `https://script.google.com/macros/s/AKfycbxmyeTRTJ3TXLvL9P904HU5NgLZYPqAbp5KP3ZphR7GOc0X2g8Xws3bYJgkKmrmnMGvJg/exec?` +
+                `name=${encodeURIComponent(formData.name)}&` +
+                `email=${encodeURIComponent(formData.email)}&` +
+                `phone=${encodeURIComponent(formData.phone || '')}&` +
+                `telegram_id=${encodeURIComponent(formData.telegram_id || '')}&` +
+                `username=${encodeURIComponent(formData.username || '')}&` +
+                `callback=${callbackName}`;
+    
+    script.src = url;
+    document.head.appendChild(script);
+    
+    // Таймаут на случай ошибки
+    setTimeout(() => {
+        if (document.head.contains(script)) {
+            document.head.removeChild(script);
+            delete window[callbackName];
             
-            const formData = {
-                name: document.getElementById('userName').value,
-                tgname: document.getElementById('userTgName').value,
-                phone: document.getElementById('userPhone').value,
-                telegram_id: user?.id || null,
-                username: user?.username || null
-            };
-            
-            // 🔒 БЕЗОПАСНЫЙ ВЫЗОВ - токен спрятан в Google Script
-            fetch('https://script.google.com/macros/s/AKfycbwpiLOR35wX8XtMQ6t7EsAkSdlmIDt5apRhBz3wvTQTUEn2Z0cj1SIlBp0PSsydVHItcw/exec', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            })
-            .then(response => {
-                // Успех!
-                tg.showPopup({
-                    title: 'Успех! 🔥',
-                    message: `${formData.name}, твоя заявка принята! Свяжусь с тобой в Telegram.`,
-                    buttons: [{ type: 'ok' }]
-                });
-                closeBookingModal();
-                form.reset();
-            })
-            .catch(error => {
-                tg.showAlert('Напиши мне напрямую: @BlackPshychoMagicBot');
-            });
+            tg.showAlert('Напиши мне напрямую: @BlackPshychoMagicBot');
+            submitButton.innerHTML = originalText;
+            submitButton.classList.remove('loading');
         }
+    }, 10000);
+}
 
         // Telegram back button handler
         function handleBack() {
