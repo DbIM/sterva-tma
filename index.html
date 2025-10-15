@@ -460,14 +460,9 @@
                            placeholder="Твоё имя" required>
                 </div>
                 <div class="form-group">
-                    <input type="email" class="form-input" id="userEmail" 
-                           placeholder="Email для связи" required>
-                </div>
-                <div class="form-group">
-                    <input type="tel" class="form-input" id="userPhone" 
-                           placeholder="Телефон (опционально)">
-                </div>
-                
+                    <input type="telegram" class="form-input" id="userTelegram" 
+                           placeholder="Telegram для связи" required>
+                </div>                
                 <button type="submit" class="tma-button" id="submitButton">
                     <i class="fas fa-hand-sparkles"></i>
                     СКРЕПИТЬ ДОГОВОР
@@ -555,30 +550,49 @@
         }
 
         // Handle form submission
-        function handleBooking(event) {
-            event.preventDefault();
-            
-            const formData = {
-                name: document.getElementById('userName').value,
-                email: document.getElementById('userEmail').value,
-                phone: document.getElementById('userPhone').value || ''
-            };
-            
-            // 🔥 ПРОСТО СОХРАНЯЕМ ДАННЫЕ И ПРОСИМ НАПИСАТЬ
-            tg.showPopup({
-                title: 'Финальный шаг! ✨',
-                message: `${formData.name}, почти готово! Напиши мне @BlackPshychoMagicBot словами "Хочу на курс стерв" и я пришлю все детали. Твои данные уже сохранены.`,
-                buttons: [{ type: 'ok' }]
-            });
-            
-            // Просто открываем чат с ботом
-            setTimeout(() => {
-                window.open('https://t.me/BlackPshychoMagicBot', '_blank');
-            }, 1000);
-            
-            closeBookingModal();
-            event.target.reset();
-        }
+            function handleBooking(event) {
+                    event.preventDefault();
+                    
+                    const form = event.target;
+                    const submitButton = document.getElementById('submitButton');
+                    const originalText = submitButton.innerHTML;
+                    
+                    // Показываем загрузку
+                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ПОСВЯЩАЕМ В КОВЕН...';
+                    submitButton.classList.add('loading');
+                    
+                    // Берем только имя (если нужно) и Telegram данные
+                    const userName = document.getElementById('userName').value || 'Новая ведьма';
+                    const userTelegram = user?.username ? `@${user.username}` : 'Не указан';
+                    const userId = user?.id || 'Неизвестен';
+                    
+                    // Формируем сообщение для бота
+                    const message = `🦇 НОВАЯ ВЕДЬМА ХОЧЕТ В КОВЕН!\n\n` +
+                                `🔮 Имя: ${userName}\n` +
+                                `⚡ Telegram: ${userTelegram}\n` +
+                                `🆔 ID: ${userId}\n` +
+                                `⏰ ${new Date().toLocaleString('ru-RU')}\n\n` +
+                                `🚀 СРОЧНО ДОБАВЬ В КУРС!`;
+                    
+                    // Открываем чат с ботом и предзаполняем сообщение
+                    const botUrl = `https://t.me/BlackPshychoMagicBot?text=${encodeURIComponent(message)}`;
+                    window.open(botUrl, '_blank');
+                    
+                    // Показываем успех
+                    tg.showPopup({
+                        title: 'Посвящение началось! 🔥',
+                        message: `${userName}, твоя заявка отправлена в ковен! Я свяжусь с тобой для инициации.`,
+                        buttons: [{ type: 'ok' }]
+                    });
+                    
+                    // Закрываем модалку и сбрасываем форму
+                    closeBookingModal();
+                    form.reset();
+                    
+                    // Восстанавливаем кнопку
+                    submitButton.innerHTML = originalText;
+                    submitButton.classList.remove('loading');
+                }
 
         // Telegram back button handler
         function handleBack() {
