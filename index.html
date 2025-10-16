@@ -550,42 +550,41 @@
         }
 
         // Handle form submission
-            async function handleBooking(event) {
-                event.preventDefault();
-                
-                const submitButton = document.getElementById('submitButton');
-                const originalText = submitButton.innerHTML;
-                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправляем...';
-                submitButton.disabled = true;
+async function handleBooking(event) {
+  event.preventDefault();
+  
+  const submitButton = document.getElementById('submitButton');
+  const originalText = submitButton.innerHTML;
+  submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправляем...';
+  submitButton.disabled = true;
 
-                const userName = document.getElementById('userName').value || 'Без имени';
-                const userTelegram = document.getElementById('userTelegram').value || 'Не указан';
+  const userName = document.getElementById('userName').value || 'Без имени';
+  const userTelegram = document.getElementById('userTelegram').value || 'Не указан';
 
-                try {
-                    await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent("https://script.google.com/macros/s/AKfycbzjsQNpzEwFF-z5-3IGkFHt9hdzr6zgjvAAJlsb879_DVPot0BH-TpWCZo9IjgkcEGliA/exec"), {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ name: userName, telegram: userTelegram }),
-                    });
+  try {
+    const gasURL = `https://script.google.com/macros/s/AKfycbwrZ3auQ9MZIKn6wT_N-Pxhun67s28pJNp054i0XgOhECc9RnLCeLl77aRukCvPQheGdQ/exec?name=${encodeURIComponent(userName)}&telegram=${encodeURIComponent(userTelegram)}`;
+    const proxyURL = `https://api.allorigins.win/raw?url=${encodeURIComponent(gasURL)}`;
 
-                    tg.showPopup({
-                        title: "Заявка отправлена 🔥",
-                        message: `${userName}, ты принята!`,
-                        buttons: [{ type: "ok" }],
-                    });
+    await fetch(proxyURL);
 
-                    closeBookingModal();
-                } catch (err) {
-                    tg.showPopup({
-                        title: "Ошибка 😿",
-                        message: "Не удалось отправить заявку. Попробуй позже.",
-                        buttons: [{ type: "ok" }],
-                    });
-                } finally {
-                    submitButton.innerHTML = originalText;
-                    submitButton.disabled = false;
-                }
-            }
+    tg.showPopup({
+      title: "Заявка отправлена 🔥",
+      message: `${userName}, ты принята!`,
+      buttons: [{ type: "ok" }],
+    });
+
+    closeBookingModal();
+  } catch (err) {
+    tg.showPopup({
+      title: "Ошибка 😿",
+      message: "Не удалось отправить заявку. Попробуй позже.",
+      buttons: [{ type: "ok" }],
+    });
+  } finally {
+    submitButton.innerHTML = originalText;
+    submitButton.disabled = false;
+  }
+}
 
 
         // Telegram back button handler
