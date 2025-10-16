@@ -563,9 +563,7 @@ async function handleBooking(event) {
 
   try {
     const gasURL = `https://script.google.com/macros/s/AKfycbwrZ3auQ9MZIKn6wT_N-Pxhun67s28pJNp054i0XgOhECc9RnLCeLl77aRukCvPQheGdQ/exec?name=${encodeURIComponent(userName)}&telegram=${encodeURIComponent(userTelegram)}`;
-    const proxyURL = `https://api.allorigins.win/raw?url=${encodeURIComponent(gasURL)}`;
-
-    await fetch(proxyURL);
+    await fetch(gasURL);
 
     tg.showPopup({
       title: "Заявка отправлена 🔥",
