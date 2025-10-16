@@ -550,46 +550,43 @@
         }
 
         // Handle form submission
-        function handleBooking(event) {
-            event.preventDefault();
-            
-            const form = event.target;
-            const submitButton = document.getElementById('submitButton');
-            const originalText = submitButton.innerHTML;
-            
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ПОСВЯЩАЕМ В КОВЕН...';
-            submitButton.classList.add('loading');
-            
-            const userName = document.getElementById('userName').value || 'Новая ведьма';
-            const userTelegram = document.getElementById('userTelegram').value || 'Не указан';
-            
-            const message = `🦇 НОВАЯ ВЕДЬМА ХОЧЕТ В КОВЕН!\n\n🔮 Имя: ${userName}\n⚡ Telegram: ${userTelegram}\n⏰ ${new Date().toLocaleString('ru-RU')}\n\n🚀 СРОЧНО ДОБАВЬ В КУРС!`;
-            
-            const botUrl = `https://t.me/BlackPshychoMagicBot?text=${encodeURIComponent(message)}`;
-            
-            // 🔥 Пробуем разные методы для iOS
-            if (tg.openLink) {
-                // Метод для iOS
-                tg.openLink(botUrl);
-            } else if (tg.openTelegramLink) {
-                // Старый метод
-                tg.openTelegramLink(botUrl);
-            } else {
-                // Для веба
-                window.open(botUrl, '_blank');
+            async function handleBooking(event) {
+                event.preventDefault();
+                
+                const submitButton = document.getElementById('submitButton');
+                const originalText = submitButton.innerHTML;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправляем...';
+                submitButton.disabled = true;
+
+                const userName = document.getElementById('userName').value || 'Без имени';
+                const userTelegram = document.getElementById('userTelegram').value || 'Не указан';
+
+                try {
+                    await fetch("https://script.google.com/macros/s/AKfycbxEmBEYMRf2tsDavCf_Y5MTMEuYRfPTLQIvtnCzAsZ5EKx7m3DkrbNsg9DF7jFEtaoNQQ/exec", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name: userName, telegram: userTelegram }),
+                    });
+
+                    tg.showPopup({
+                        title: "Заявка отправлена 🔥",
+                        message: `${userName}, ты принята!`,
+                        buttons: [{ type: "ok" }],
+                    });
+
+                    closeBookingModal();
+                } catch (err) {
+                    tg.showPopup({
+                        title: "Ошибка 😿",
+                        message: "Не удалось отправить заявку. Попробуй позже.",
+                        buttons: [{ type: "ok" }],
+                    });
+                } finally {
+                    submitButton.innerHTML = originalText;
+                    submitButton.disabled = false;
+                }
             }
-            
-            tg.showPopup({
-                title: 'Готово! 🔥',
-                message: `${userName}, заявка отправлена! Жди моего сообщения.`,
-                buttons: [{ type: 'ok' }]
-            });
-            
-            closeBookingModal();
-            form.reset();
-            submitButton.innerHTML = originalText;
-            submitButton.classList.remove('loading');
-        }
+
 
         // Telegram back button handler
         function handleBack() {
